@@ -26,43 +26,46 @@ int main()
     // Ledger to store all user-created expenses
     std::vector<Expense> expenses{};
 
-    int optionNumber{};
-    bool isValid{false};
+    char answerReset{};
+    bool keepRunning{true};
 
-    // Validation loop: ensures the user selects an existing category ID
-    do
+    while (keepRunning)
     {
-        std::cout << "\n--- Available Categories ---\n";
+        int optionNumber{};
+        bool isValid{false};
 
-        // Print all categories using a range-based for loop (read-only)
-        for (const auto &category : categories)
+        // Validation loop: ensures the user selects an existing category ID
+        do
         {
-            std::cout << "[" << category.id << "]" << category.categoryName << " ";
-        }
+            std::cout << "\n--- Available Categories ---\n";
 
-        std::cout << "\nSelect one category & add a new expense: ";
-        std::cin >> optionNumber;
-
-        // Check if the input ID matches any category in the catalog
-        for (const auto &category : categories)
-        {
-            if (category.id == optionNumber)
+            // Print all categories using a range-based for loop (read-only)
+            for (const auto &category : categories)
             {
-                isValid = true;
-                break; // Exit search loop once found
+                std::cout << "[" << category.id << "]" << category.categoryName << " ";
             }
-        }
 
-        if (!isValid)
-        {
-            std::cout << "Error: ID " << optionNumber << " not found. Try again.\n";
-        }
+            std::cout << "\nChoice: ";
+            std::cin >> optionNumber;
 
-    } while (!isValid);
+            // Check if the input ID matches any category in the catalog
+            for (const auto &category : categories)
+            {
+                if (category.id == optionNumber)
+                {
+                    isValid = true;
+                    break;
+                }
+            }
 
-    // Proceed only if the category ID was successfully validated
-    if (isValid)
-    {
+            // Proceed only if the category ID was successfully validated
+            if (!isValid)
+            {
+                std::cout << "Error: ID " << optionNumber << " not found. Try again.\n";
+            }
+
+        } while (!isValid);
+
         Expense newEntry{}; // Temporary object to hold the new record
         newEntry.categoryId = optionNumber;
 
@@ -78,8 +81,15 @@ int main()
 
         // Commit the new expense to the ledger
         expenses.push_back(newEntry);
-        std::cout << "\n[System]: Expense added successfully.\n";
-    }
 
+        std::cout << "\nAdd another expense? (y/n): ";
+        std::cin >> answerReset;
+
+        if (answerReset == 'n' || answerReset == 'N')
+        {
+            keepRunning = false;
+        }
+    }
+    std::cout << "\nExiting... Total expenses recorded: " << expenses.size();
     return 0;
 }
