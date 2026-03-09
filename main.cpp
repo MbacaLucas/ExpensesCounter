@@ -13,7 +13,7 @@ struct Category
 struct Expense
 {
     int id;
-    int categoryId; // Foreign Key: Links to Category.id
+    int categoryId; // Foreign Key: Links to Category.
     std::string description;
     double amount;
 };
