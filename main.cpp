@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm> // Required for std::find_if
 #include <iomanip>   // Required for std::setw and std::setprecision
+#include <numeric>
 
 // Blueprint for expense categories
 struct Category
@@ -117,6 +118,16 @@ int main()
                       << "$" << std::fixed << std::setprecision(2) << item.amount << "\n";
         }
     }
+
+    double totalSum = std::accumulate(expenses.begin(), expenses.end(), 0.0,
+                                      [](double currentTotal, const Expense &e)
+                                      {
+                                          return currentTotal + e.amount;
+                                      });
+
+    std::cout << std::right << std::setw(45) << "TOTAL: "
+              << "$" << std::fixed << std::setprecision(2) << totalSum << "\n";
+    std::cout << std::string(60, '=') << "\n";
     std::cout << std::string(60, '-') << "\n";
 
     return 0;
