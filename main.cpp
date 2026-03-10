@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm> // Required for std::find_if
+#include <iomanip>   // Required for std::setw and std::setprecision
 
 // Blueprint for expense categories
 struct Category
@@ -13,7 +15,7 @@ struct Category
 struct Expense
 {
     int id;
-    int categoryId; // Foreign Key: Links to Category.
+    int categoryId; // Foreign Key: Links to Category.id
     std::string description;
     double amount;
 };
@@ -21,34 +23,34 @@ struct Expense
 int main()
 {
     // Initial catalog of available categories
-    std::vector<Category> categories{{1, "Food"}, {2, "transport"}, {3, "services"}};
+    std::vector<Category> categories{{1, "Food"}, {2, "Transport"}, {3, "Services"}};
 
     // Ledger to store all user-created expenses
     std::vector<Expense> expenses{};
 
     char answerReset{};
-    bool keepRunning{true};
+    bool keepRunning{true}; // Controls the application main loop
 
+    // --- MAIN INPUT LOOP ---
     while (keepRunning)
     {
         int optionNumber{};
         bool isValid{false};
 
-        // Validation loop: ensures the user selects an existing category ID
+        // VALIDATION LOOP: Ensures the user selects an existing category ID
         do
         {
             std::cout << "\n--- Available Categories ---\n";
 
-            // Print all categories using a range-based for loop (read-only)
             for (const auto &category : categories)
             {
-                std::cout << "[" << category.id << "]" << category.categoryName << " ";
+                std::cout << "[" << category.id << "] " << category.categoryName << " ";
             }
 
             std::cout << "\nChoice: ";
             std::cin >> optionNumber;
 
-            // Check if the input ID matches any category in the catalog
+            // Manual ID existence check
             for (const auto &category : categories)
             {
                 if (category.id == optionNumber)
@@ -58,15 +60,15 @@ int main()
                 }
             }
 
-            // Proceed only if the category ID was successfully validated
             if (!isValid)
             {
                 std::cout << "Error: ID " << optionNumber << " not found. Try again.\n";
             }
 
-        } while (!isValid);
+        } while (!isValid); // Remains in loop until ID is valid
 
-        Expense newEntry{}; // Temporary object to hold the new record
+        // Expense data capture
+        Expense newEntry{};
         newEntry.categoryId = optionNumber;
 
         std::cout << "Enter description: ";
@@ -76,12 +78,11 @@ int main()
         std::cout << "Enter amount: ";
         std::cin >> newEntry.amount;
 
-        // Auto-increment ID based on current vector size
+        // Auto-increment ID based on current vector size and commit to ledger
         newEntry.id = expenses.size() + 1;
-
-        // Commit the new expense to the ledger
         expenses.push_back(newEntry);
 
+        // Exit control for the Main Loop
         std::cout << "\nAdd another expense? (y/n): ";
         std::cin >> answerReset;
 
@@ -90,6 +91,33 @@ int main()
             keepRunning = false;
         }
     }
-    std::cout << "\nExiting... Total expenses recorded: " << expenses.size();
+
+    // --- FINAL REPORT GENERATION ---
+    std::cout << "\n"
+              << std::string(60, '-') << "\n";
+    std::cout << std::left << std::setw(5) << "ID"
+              << std::setw(15) << "Category"
+              << std::setw(25) << "Description"
+              << "Amount\n";
+    std::cout << std::string(60, '-') << "\n";
+
+    for (const auto &item : expenses)
+    {
+        // Using std::find_if to link the category name via its ID
+        // [item] captures the current expense, (const Category &c) represents each element in 'categories'
+        auto it = std::find_if(categories.begin(), categories.end(), [item](const Category &c)
+                               { return c.id == item.categoryId; });
+
+        // Safety check: verify the iterator before accessing members
+        if (it != categories.end())
+        {
+            std::cout << std::left << std::setw(5) << item.id
+                      << std::setw(15) << it->categoryName
+                      << std::setw(25) << item.description
+                      << "$" << std::fixed << std::setprecision(2) << item.amount << "\n";
+        }
+    }
+    std::cout << std::string(60, '-') << "\n";
+
     return 0;
 }
